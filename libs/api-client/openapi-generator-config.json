@@ -1,0 +1,6 @@
+{
+	"supportsES6": true,
+	"typescriptThreePlus": true,
+	"withInterfaces": false,
+	"useSingleRequestParameter": false
+}

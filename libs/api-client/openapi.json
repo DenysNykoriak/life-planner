@@ -1,0 +1,119 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "Life Planner API",
+		"version": "1.0.0"
+	},
+	"servers": [{ "url": "http://localhost:3000/api", "description": "API (set base via client)" }],
+	"tags": [{ "name": "plans", "description": "Daily plans" }],
+	"paths": {
+		"/plans/day/{dayTimestamp}": {
+			"get": {
+				"tags": ["plans"],
+				"operationId": "getPlansDay",
+				"parameters": [
+					{
+						"name": "dayTimestamp",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "format": "int64" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Day plan",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/DayPlanDto" }
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			},
+			"put": {
+				"tags": ["plans"],
+				"operationId": "putPlansDay",
+				"parameters": [
+					{
+						"name": "dayTimestamp",
+						"in": "path",
+						"required": true,
+						"schema": { "type": "integer", "format": "int64" }
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": { "$ref": "#/components/schemas/UpdatePlanDto" }
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Updated plan",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/DayPlanDto" }
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"cookieAuth": {
+				"type": "apiKey",
+				"in": "cookie",
+				"name": "better-auth.session_token"
+			}
+		},
+		"schemas": {
+			"PlanItemDto": {
+				"type": "object",
+				"required": ["id", "text", "completed", "sortOrder"],
+				"properties": {
+					"id": { "type": "string" },
+					"text": { "type": "string" },
+					"completed": { "type": "boolean" },
+					"sortOrder": { "type": "integer" }
+				}
+			},
+			"DayPlanDto": {
+				"type": "object",
+				"required": ["date", "items"],
+				"properties": {
+					"date": { "type": "integer", "format": "int64" },
+					"items": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/PlanItemDto" }
+					}
+				}
+			},
+			"PlanItemInputDto": {
+				"type": "object",
+				"required": ["text", "completed", "sortOrder"],
+				"properties": {
+					"id": { "type": "string", "nullable": true },
+					"text": { "type": "string" },
+					"completed": { "type": "boolean" },
+					"sortOrder": { "type": "integer" }
+				}
+			},
+			"UpdatePlanDto": {
+				"type": "object",
+				"required": ["items"],
+				"properties": {
+					"items": {
+						"type": "array",
+						"items": { "$ref": "#/components/schemas/PlanItemInputDto" }
+					}
+				}
+			}
+		}
+	}
+}

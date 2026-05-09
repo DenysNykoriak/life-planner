@@ -1,0 +1,22 @@
+{
+	"name": "@life-planner/api-client",
+	"version": "0.0.1",
+	"private": true,
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"generate": "openapi-generator-cli generate -i openapi.json -g typescript-fetch -o src/generated -c openapi-generator-config.json",
+		"build": "tsc -p tsconfig.json"
+	},
+	"devDependencies": {
+		"@openapitools/openapi-generator-cli": "^2.25.0",
+		"typescript": "^5.8.3"
+	}
+}

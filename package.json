@@ -1,0 +1,21 @@
+{
+	"name": "life-planner",
+	"private": true,
+	"workspaces": [
+		"services/*",
+		"libs/*"
+	],
+	"scripts": {
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"api:dev": "npm run start:dev -w @life-planner/api",
+		"web:dev": "npm run dev -w @life-planner/dashboard",
+		"client:generate": "npm run generate -w @life-planner/api-client",
+		"build": "npm run build -w @life-planner/api-client && npm run build -w @life-planner/api && npm run build -w @life-planner/dashboard",
+		"db:push": "npm run prisma:push -w @life-planner/api",
+		"db:generate": "npm run prisma:generate -w @life-planner/api"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.2.4"
+	}
+}
