@@ -1,0 +1,40 @@
+# Module: Code Style (Biome)
+
+Use this module as the default formatter/linter setup for the whole repo.
+
+## Recommended defaults
+
+- Tabs
+- Line width: 100
+- LF line endings
+- Double quotes
+- Semicolons always
+- Trailing commas where valid
+- Import organization enabled
+
+## Practical setup
+
+- Keep one root `biome.json` for workspace-wide rules.
+- Ignore generated/build outputs (`dist`, `build`, `coverage`, `generated`, `node_modules`).
+- Use overrides only when framework-specific parsing is required (example: decorator-heavy Nest files).
+
+## CI and local workflow
+
+- Root script: `biome check .`
+- Optional auto-fix: `biome check --write .`
+- Run in CI before build/test steps to fail fast on style issues.
+
+## Real project example
+
+```txt
+biome.json
+package.json
+services/api/package.json
+services/dashboard/package.json
+```
+
+Design notes:
+
+- Keep root Biome config as single source of truth.
+- Keep per-service scripts simple and aligned with root style.
+- Keep generated folders ignored to reduce lint noise.
