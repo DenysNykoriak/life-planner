@@ -10,9 +10,13 @@ Use this checklist when starting a new project with this docs set.
 
 ## 2) Create workspace shape
 
-- `services/api` for backend
-- `services/dashboard` (or `services/web`) for frontend
-- `libs/api-client` for generated typed client
+Add backend package, frontend SPA package, and generated API client package to root workspaces (exact names are up to you). Example:
+
+```json
+{
+	"workspaces": ["packages/*", "apps/*"]
+}
+```
 
 ## 3) Setup quality gates
 
@@ -28,24 +32,13 @@ Use this checklist when starting a new project with this docs set.
 
 ## 5) Add optional modules only when needed
 
+- Server-state hooks: `docs/modules/server-state-hooks/README.md`
 - Routing: `docs/modules/routing-tanstack-router/README.md`
 - Forms: `docs/modules/forms-tanstack-form/README.md`
 - i18n: `docs/modules/i18n-i18next/README.md`
 - Desktop: `docs/modules/desktop-tauri/README.md`
 - UI: `docs/modules/ui-mantine/README.md`
-
-## Real project bootstrap example
-
-```txt
-services/
-  api/
-  dashboard/
-libs/
-  api-client/
-docs/
-  core.md
-  modules/
-```
+- Authorization: `docs/modules/authorization-better-auth/README.md`
 
 Suggested first delivery scope:
 

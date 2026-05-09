@@ -8,38 +8,72 @@ Generate and publish a TypeScript client from backend OpenAPI, then consume it a
 
 ## Flow
 
-1. Generate `openapi.json` from backend app.
+1. Produce an OpenAPI JSON document from the backend (HTTP endpoint or build artifact).
 2. Run OpenAPI Generator (`typescript-fetch` is a practical default).
-3. Output generated code to a dedicated folder (example: `src/generated`).
-4. Build library and expose typed exports.
+3. Output generated code to a dedicated folder inside the client package.
+4. Build the library and expose typed exports.
 5. Consume via workspace dependency in frontend apps.
 
 ## Package shape
 
-Recommended library setup:
+Recommended library metadata:
 
-- `type: "module"`
-- clear `exports` map
-- scripts: `generate`, `build`
-- generated files excluded from manual edits
+```json
+{
+	"name": "my-api-client",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		}
+	},
+	"scripts": {
+		"generate": "openapi-generator-cli generate -i \"$OPENAPI_SPEC\" -g typescript-fetch -o ./src/generated -c openapi-generator-config.json",
+		"build": "vite build"
+	}
+}
+```
+
+Adjust `-i` to wherever your OpenAPI JSON lives after export.
+
+## Generator options (example)
+
+```json
+{
+	"generateSourceCodeOnly": true,
+	"supportsES6": true,
+	"withSeparateModelsAndApi": true,
+	"modelPackage": "models",
+	"apiPackage": "api",
+	"useSingleRequestParameter": true,
+	"usePromises": true,
+	"platform": "browser"
+}
+```
+
+## Public exports (example)
+
+Re-export generated APIs and any shared auth metadata your SPA needs:
+
+```ts
+export * from "./generated/src";
+
+export const authOptions = {
+	ac,
+	roles,
+};
+```
+
+Define `ac` and `roles` in one shared module that both backend and client can import, or duplicate only the minimal shape the client plugin requires—pick one approach and stay consistent.
 
 ## CI usage
 
 - Regenerate client when API contract changes.
 - Fail CI if generated output is stale (either commit artifacts or regenerate during pipeline).
 
-## Real project example
-
-```txt
-libs/api-client/
-  src/generated/
-  src/index.ts
-  openapi-generator-config.json
-  package.json
-```
-
 Design notes:
 
-- Export only stable public methods/types from `src/index.ts`.
-- Treat `src/generated` as read-only.
-- Keep custom wrappers outside generated folder to avoid overwrite during regeneration.
+- Treat generated output as read-only.
+- Keep custom wrappers outside generated folders so regeneration never deletes hand-written code.

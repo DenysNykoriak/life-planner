@@ -10,27 +10,87 @@ Optional module. Add only when SPA navigation, layouts, or route-level data hand
 ## Recommended usage
 
 - Prefer file-based routes for medium/large apps.
-- Keep route tree generated and out of manual edits.
-- Co-locate route components with route-level logic.
+- Keep the generated route tree read-only.
+- Keep every file route module in one folder so URLs stay easy to trace.
 
 ## Conventions
 
-- Define one app root route for shared layout/providers.
-- Keep auth/permission checks at route boundaries.
-- For simple single-screen apps, skip this module.
+- Define one root route for shared layout and providers.
+- Keep auth checks at route boundaries (`beforeLoad`, loaders, or layout routes).
+- Use `createFileRoute` per route file.
 
-## Real project example
+## Vite plugin (example)
 
-```txt
-src/routes/__root.tsx
-src/routes/sign-in.tsx
-src/routes/sign-up.tsx
-src/routes/folders.tsx
-src/routeTree.gen.ts
+```ts
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+	plugins: [tanstackRouter(), react()],
+});
 ```
 
-Design notes:
+## Router bootstrap (example)
 
-- Keep route file names close to URL intent.
-- Keep shared providers in root route only.
-- Keep generated route tree committed or regenerated in CI.
+```tsx
+import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { routeTree } from "./routeTree.gen";
+
+const router = createRouter({ routeTree });
+
+declare module "@tanstack/react-router" {
+	interface Register {
+		router: typeof router;
+	}
+}
+
+createRoot(document.getElementById("root")!).render(
+	<StrictMode>
+		<RouterProvider router={router} />
+	</StrictMode>,
+);
+```
+
+The plugin emits a generated route tree module (filename depends on plugin settings); treat it as read-only.
+
+## Root layout route (example)
+
+```tsx
+import { Outlet, createRootRoute } from "@tanstack/react-router";
+
+export const Route = createRootRoute({
+	component: () => (
+		<>
+			<Outlet />
+		</>
+	),
+});
+```
+
+## Protected screen (example)
+
+```tsx
+import { createFileRoute, redirect } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/sign-in")({
+	beforeLoad: async ({ context }) => {
+		if (context.session) {
+			throw redirect({ to: "/" });
+		}
+	},
+	component: SignIn,
+});
+
+function SignIn() {
+	return null;
+}
+```
+
+Wire `context.session` from your router setup or loader layer.
+
+## When to skip
+
+For simple single-screen apps, skip this module.

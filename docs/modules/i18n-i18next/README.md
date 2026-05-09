@@ -7,28 +7,13 @@ Optional module. Add only when multiple locales are a real product requirement.
 - `i18next`
 - `react-i18next`
 
-## Suggested structure
-
-- locale resources under `src/locales/*`
-- i18n initialization in one library file (`src/lib/i18n.ts` or equivalent)
-
 ## Translation code style options
 
 Pick one style and keep it consistent across the app.
 
 ### Style A: Namespace per domain (recommended)
 
-```txt
-src/locales/
-  en/
-    common.json
-    auth.json
-    settings.json
-  uk/
-    common.json
-    auth.json
-    settings.json
-```
+One folder per locale; JSON files per namespace (`common`, `auth`, …).
 
 ```json
 {
@@ -62,14 +47,47 @@ t("auth.signIn.title");
 
 ### Style C: Feature-local dictionaries + merge
 
-```txt
-src/features/auth/i18n/en.json
-src/features/auth/i18n/uk.json
-src/features/profile/i18n/en.json
-src/features/profile/i18n/uk.json
+Keep small JSON files per feature and merge at startup. Use only if you have a clear merge strategy.
+
+## Initialization (example)
+
+Single bundle import style:
+
+```ts
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import en from "./locales/en.json";
+import uk from "./locales/uk.json";
+
+const resources = {
+	en: { translation: en },
+	uk: { translation: uk },
+};
+
+export function initI18n(activeLocale: string): void {
+	i18n.use(initReactI18next).init({
+		resources,
+		lng: activeLocale,
+		fallbackLng: "en",
+		interpolation: { escapeValue: false },
+	});
+}
 ```
 
-Use this only if app is strongly feature-modular and you have a merge step at startup/build.
+## Sample dictionary excerpt
+
+```json
+{
+	"signIn": {
+		"title": "Welcome back",
+		"email": "Email",
+		"password": "Password",
+		"submit": "Sign in",
+		"invalidEmail": "Invalid email address",
+		"passwordRequired": "Password is required"
+	}
+}
+```
 
 ## Conventions
 
@@ -78,22 +96,6 @@ Use this only if app is strongly feature-modular and you have a merge step at st
 - Keep one source of truth for active locale (user settings + persistence).
 - Avoid string concatenation for translated sentences.
 - Prefer interpolation values over building strings in code.
-
-## Real project example
-
-```txt
-src/lib/i18n.ts
-src/components/LocaleSync.tsx
-src/components/LocalePicker.tsx
-src/locales/en/common.json
-src/locales/uk/common.json
-```
-
-Example key naming:
-
-- `common.buttons.save`
-- `auth.signIn.title`
-- `folders.emptyState.description`
 
 ## When to skip
 

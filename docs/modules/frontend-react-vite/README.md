@@ -7,18 +7,13 @@ Use this as the default frontend baseline.
 - React SPA with Vite
 - TypeScript strict mode
 - UI module selected separately (Mantine recommended)
-
-## Suggested structure
-
-- `src/app/` for providers and app bootstrapping
-- `src/pages/` or `src/features/` for domain UI
-- `src/lib/` for shared helpers and API adapters
+- Icons: Lucide (`lucide-react`) as the default icon set
 
 ## Required practices
 
 - Keep entrypoint small and predictable
 - Keep framework providers centralized
-- Keep feature code separated from shared UI primitives
+- Keep feature UI separated from generic primitives
 - Keep TypeScript errors at zero
 
 ## Optional integrations
@@ -27,20 +22,35 @@ Use this as the default frontend baseline.
 - Forms: `docs/modules/forms-tanstack-form/README.md`
 - i18n: `docs/modules/i18n-i18next/README.md`
 - Server state: `docs/modules/server-state-tanstack-query/README.md`
+- Server-state hooks: `docs/modules/server-state-hooks/README.md`
 - UI: `docs/modules/ui-mantine/README.md`
+- Authorization: `docs/modules/authorization-better-auth/README.md`
 
-## Real project example
+## Entry wiring (example)
 
-```txt
-src/app/providers/
-src/features/auth/
-src/features/folders/
-src/components/common/
-src/lib/api/
+```tsx
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+
+function Root() {
+	return (
+		<>
+			{/* RouterProvider, MantineProvider, i18n, etc. */}
+			<h1>App</h1>
+		</>
+	);
+}
+
+createRoot(document.getElementById("root")!).render(
+	<StrictMode>
+		<Root />
+	</StrictMode>,
+);
 ```
+
+Combine providers in one place so feature code stays declarative.
 
 Design notes:
 
-- Keep domain components inside `features/*`.
-- Keep reusable UI primitives in `components/common`.
-- Keep API-specific adapters in `lib/api` to avoid coupling UI with transport details.
+- When using TanStack Router file routing, follow `docs/modules/routing-tanstack-router/README.md` for plugin + generated route tree wiring.
+- Keep HTTP clients and auth helpers behind small modules consumed by hooks or route loaders.

@@ -28,17 +28,25 @@ Define runtime variables and API contract early so frontend, backend, and genera
 - Validate backend env variables on startup.
 - Keep contract updates and client regeneration in the same PR when possible.
 
-## Real project example
+## Example environment files
 
-```txt
-services/api/src/config/
-services/api/.env.example
-services/dashboard/.env.example
-docs/modules/api-contract/README.md
+Backend:
+
+```bash
+PORT=8080
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DB"
+API_URL=http://localhost:8080
+FRONTEND_URL=http://localhost:3000
+```
+
+Frontend (Vite):
+
+```bash
+VITE_API_URL=http://localhost:8080
 ```
 
 Design notes:
 
-- Keep `.env.example` files updated with required variables only.
+- List every required variable in your team wiki or onboarding doc.
 - Keep auth and storage contracts explicit (headers, cookies, payload shapes).
 - Keep API path/version policy stable to avoid client churn.

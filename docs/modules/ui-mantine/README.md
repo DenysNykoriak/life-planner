@@ -4,7 +4,7 @@ Use this module when you need a component library and design system foundation f
 
 ## Why this module
 
-Mantine replaces Tailwind + DaisyUI in this docs baseline.
+Mantine gives a cohesive component set and theme layer instead of assembling many small UI libraries.
 
 ## Core packages
 
@@ -13,30 +13,58 @@ Mantine replaces Tailwind + DaisyUI in this docs baseline.
 
 Add extra packages only if needed (`@mantine/form`, `@mantine/notifications`, `@mantine/dates`, ...).
 
+## Icons
+
+Use Lucide for icons (`lucide-react`). Import only the icons you need so bundles stay small.
+
+```tsx
+import { Camera, Trash2 } from "lucide-react";
+import { ActionIcon, Button } from "@mantine/core";
+
+export function Example() {
+	return (
+		<>
+			<Button leftSection={<Camera size={18} />}>Photo</Button>
+			<ActionIcon variant="subtle" aria-label="Delete">
+				<Trash2 size={18} />
+			</ActionIcon>
+		</>
+	);
+}
+```
+
 ## Setup notes
 
-- Follow Mantine Vite setup.
-- Keep PostCSS config required by Mantine preset.
-- Wrap app with `MantineProvider` at entry/root.
-- Centralize theme tokens (`colors`, `radius`, `spacing`, typography) in one theme file.
+- Follow Mantine Vite setup (PostCSS pipeline as required by your Mantine major version).
+- Wrap the tree with `MantineProvider` at the root.
+- Centralize theme tokens (`colors`, `radius`, `spacing`, typography) in one theme object.
 
 ## Best practices
 
 - Prefer Mantine components first, custom primitives second.
-- Keep shared UI wrappers in one module (`ui/` or similar).
+- Keep shared UI wrappers small and consistent.
 - Avoid mixing multiple UI systems in the same app.
 
-## Real project example
+## Theme + provider (example)
 
-```txt
-src/theme/index.ts
-src/app/providers/MantineProvider.tsx
-src/components/common/AppShell.tsx
-src/components/common/ConfirmModal.tsx
+```tsx
+import { MantineProvider, createTheme } from "@mantine/core";
+
+const theme = createTheme({
+	fontFamily: "system-ui, sans-serif",
+	defaultRadius: "md",
+});
+
+export function AppThemeProvider({ children }: { children: React.ReactNode }) {
+	return (
+		<MantineProvider defaultColorScheme="light" theme={theme}>
+			{children}
+		</MantineProvider>
+	);
+}
 ```
 
 Design notes:
 
-- Keep all theme tokens in `theme/index.ts`.
-- Keep design-system wrappers in `components/common`.
-- Keep feature-specific styling in feature folders, not global theme.
+- Extend the theme object as product visual language stabilizes.
+- Keep feature-specific styling local to components instead of growing global CSS.
