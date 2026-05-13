@@ -75,12 +75,13 @@
 		"schemas": {
 			"PlanItemDto": {
 				"type": "object",
-				"required": ["id", "text", "completed", "sortOrder"],
+				"required": ["id", "text", "completed", "sortOrder", "parentId"],
 				"properties": {
 					"id": { "type": "string" },
 					"text": { "type": "string" },
 					"completed": { "type": "boolean" },
-					"sortOrder": { "type": "integer" }
+					"sortOrder": { "type": "integer" },
+					"parentId": { "type": "string", "nullable": true }
 				}
 			},
 			"DayPlanDto": {
@@ -101,7 +102,8 @@
 					"id": { "type": "string", "nullable": true },
 					"text": { "type": "string" },
 					"completed": { "type": "boolean" },
-					"sortOrder": { "type": "integer" }
+					"sortOrder": { "type": "integer" },
+					"depth": { "type": "integer", "minimum": 0 }
 				}
 			},
 			"UpdatePlanDto": {

@@ -23,6 +23,11 @@ export class PlanItemInputDto {
 	@IsInt()
 	@Min(0)
 	sortOrder!: number;
+
+	@IsOptional()
+	@IsInt()
+	@Min(0)
+	depth?: number;
 }
 
 export class UpdatePlanDto {

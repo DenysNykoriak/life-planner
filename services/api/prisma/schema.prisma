@@ -85,9 +85,14 @@ model PlanItem {
   id          String    @id @default(cuid())
   dailyPlanId String
   dailyPlan   DailyPlan @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  parentId    String?
+  parent      PlanItem?  @relation("PlanItemNested", fields: [parentId], references: [id], onDelete: Cascade)
+  children    PlanItem[] @relation("PlanItemNested")
   text        String
   sortOrder   Int       @default(0)
   completed   Boolean   @default(false)
+
+  @@index([parentId])
 }
 
 

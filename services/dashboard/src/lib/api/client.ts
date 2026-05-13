@@ -39,6 +39,7 @@ export type PlanItemWrite = {
 	text: string;
 	completed: boolean;
 	sortOrder: number;
+	depth: number;
 };
 
 export async function getDayPlan(dayTimestampMs: number): Promise<DayPlan> {
@@ -55,6 +56,7 @@ export async function putDayPlan(dayTimestampMs: number, items: PlanItemWrite[])
 			text: i.text,
 			completed: i.completed,
 			sortOrder: i.sortOrder ?? idx,
+			depth: i.depth ?? 0,
 		})),
 	};
 	try {

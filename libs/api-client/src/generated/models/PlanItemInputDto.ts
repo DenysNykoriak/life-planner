@@ -43,6 +43,12 @@ export interface PlanItemInputDto {
      * @memberof PlanItemInputDto
      */
     sortOrder: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PlanItemInputDto
+     */
+    depth?: number | null;
 }
 
 /**
@@ -69,6 +75,7 @@ export function PlanItemInputDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         'text': json['text'],
         'completed': json['completed'],
         'sortOrder': json['sortOrder'],
+        'depth': json['depth'] == null ? undefined : json['depth'],
     };
 }
 
@@ -87,6 +94,7 @@ export function PlanItemInputDtoToJSONTyped(value?: PlanItemInputDto | null, ign
         'text': value['text'],
         'completed': value['completed'],
         'sortOrder': value['sortOrder'],
+        'depth': value['depth'],
     };
 }
 

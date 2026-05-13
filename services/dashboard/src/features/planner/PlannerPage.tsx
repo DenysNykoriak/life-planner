@@ -1,5 +1,4 @@
 import {
-	ActionIcon,
 	Alert,
 	AppShell,
 	Badge,
@@ -7,59 +6,34 @@ import {
 	Button,
 	Card,
 	Center,
-	Checkbox,
 	Container,
 	Divider,
 	Group,
 	Loader,
 	Stack,
 	Text,
-	TextInput,
 	Title,
 } from "@mantine/core";
 import { useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
-import { CalendarDays, LogOut, Plus, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, LogOut, Plus } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/features/auth/AuthContext";
 import { usePlansActions } from "@/features/planner/hooks/usePlansActions";
 import { usePlansFetch } from "@/features/planner/hooks/usePlansFetch";
-import type { PlanItem } from "@/lib/api/types";
-
-type DraftItem = {
-	key: string;
-	text: string;
-	completed: boolean;
-};
-
-function itemsToDraft(items: PlanItem[]): DraftItem[] {
-	return items.map((i) => ({
-		key: i.id,
-		text: i.text,
-		completed: i.completed,
-	}));
-}
-
-function draftFingerprint(items: PlanItem[]): string {
-	return items.map((i) => `${i.id}:${i.completed}:${i.text}`).join("|");
-}
-
-function toPayload(
-	drafts: DraftItem[],
-): Array<{ text: string; completed: boolean; sortOrder: number }> {
-	return drafts
-		.map((d, idx) => ({
-			text: d.text.trim(),
-			completed: d.completed,
-			sortOrder: idx,
-		}))
-		.filter((d) => d.text.length > 0);
-}
+import { PlannerBullets } from "@/features/planner/PlannerBullets";
+import {
+	draftFingerprintFlat,
+	type FlatBullet,
+	flatToPayload,
+	itemsToFlat,
+	planFingerprint,
+} from "@/features/planner/planBullets";
 
 export function PlannerPage() {
 	const navigate = useNavigate();
 	const { user, ready, logout } = useAuth();
-	const { saveEveningReview } = usePlansActions();
+	const { saveYesterdayPlan, saveTomorrowPlan } = usePlansActions();
 
 	const todayTs = useMemo(() => dayjs().startOf("day").valueOf(), []);
 	const yesterdayTs = useMemo(
@@ -88,47 +62,122 @@ export function PlannerPage() {
 		}
 	}, [ready, user, navigate]);
 
-	const [yDraft, setYDraft] = useState<DraftItem[]>([]);
-	const [tDraft, setTDraft] = useState<DraftItem[]>([]);
+	const [yDraft, setYDraft] = useState<FlatBullet[]>([]);
+	const [tDraft, setTDraft] = useState<FlatBullet[]>([]);
 	const [ySeed, setYSeed] = useState("");
 	const [tSeed, setTSeed] = useState("");
 
+	const lastSavedY = useRef<string | null>(null);
+	const lastSavedT = useRef<string | null>(null);
+	const yDraftRef = useRef(yDraft);
+	const tDraftRef = useRef(tDraft);
+	yDraftRef.current = yDraft;
+	tDraftRef.current = tDraft;
+	const saveTimerY = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const saveTimerT = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 	useEffect(() => {
 		if (!yesterdayPlan) return;
-		const fp = draftFingerprint(yesterdayPlan.items);
+		const fp = planFingerprint(yesterdayPlan.items);
 		if (fp !== ySeed) {
-			setYDraft(itemsToDraft(yesterdayPlan.items));
+			setYDraft(itemsToFlat(yesterdayPlan.items));
 			setYSeed(fp);
+			lastSavedY.current = fp;
 		}
 	}, [yesterdayPlan, ySeed]);
 
 	useEffect(() => {
 		if (!tomorrowPlan) return;
-		const fp = draftFingerprint(tomorrowPlan.items);
+		const fp = planFingerprint(tomorrowPlan.items);
 		if (fp !== tSeed) {
-			setTDraft(itemsToDraft(tomorrowPlan.items));
+			setTDraft(itemsToFlat(tomorrowPlan.items));
 			setTSeed(fp);
+			lastSavedT.current = fp;
 		}
 	}, [tomorrowPlan, tSeed]);
 
-	const updateY = (key: string, patch: Partial<DraftItem>) => {
-		setYDraft((rows) => rows.map((r) => (r.key === key ? { ...r, ...patch } : r)));
+	useEffect(() => {
+		if (!user || loadingPlans) return;
+		const fp = draftFingerprintFlat(yDraft);
+		if (fp === lastSavedY.current) return;
+		if (saveTimerY.current) clearTimeout(saveTimerY.current);
+		saveTimerY.current = setTimeout(() => {
+			saveTimerY.current = null;
+			const snapshot = yDraftRef.current;
+			const snapFp = draftFingerprintFlat(snapshot);
+			if (snapFp === lastSavedY.current) return;
+			saveYesterdayPlan.mutate(
+				{ dayTs: yesterdayTs, items: flatToPayload(snapshot) },
+				{
+					onSuccess: () => {
+						lastSavedY.current = snapFp;
+					},
+				},
+			);
+		}, 450);
+		return () => {
+			if (saveTimerY.current) clearTimeout(saveTimerY.current);
+		};
+	}, [yDraft, user, loadingPlans, yesterdayTs, saveYesterdayPlan]);
+
+	useEffect(() => {
+		if (!user || loadingPlans) return;
+		const fp = draftFingerprintFlat(tDraft);
+		if (fp === lastSavedT.current) return;
+		if (saveTimerT.current) clearTimeout(saveTimerT.current);
+		saveTimerT.current = setTimeout(() => {
+			saveTimerT.current = null;
+			const snapshot = tDraftRef.current;
+			const snapFp = draftFingerprintFlat(snapshot);
+			if (snapFp === lastSavedT.current) return;
+			saveTomorrowPlan.mutate(
+				{ dayTs: tomorrowTs, items: flatToPayload(snapshot) },
+				{
+					onSuccess: () => {
+						lastSavedT.current = snapFp;
+					},
+				},
+			);
+		}, 450);
+		return () => {
+			if (saveTimerT.current) clearTimeout(saveTimerT.current);
+		};
+	}, [tDraft, user, loadingPlans, tomorrowTs, saveTomorrowPlan]);
+
+	const flushY = () => {
+		if (saveTimerY.current) {
+			clearTimeout(saveTimerY.current);
+			saveTimerY.current = null;
+		}
+		const snapshot = yDraftRef.current;
+		const snapFp = draftFingerprintFlat(snapshot);
+		if (snapFp === lastSavedY.current) return;
+		saveYesterdayPlan.mutate(
+			{ dayTs: yesterdayTs, items: flatToPayload(snapshot) },
+			{
+				onSuccess: () => {
+					lastSavedY.current = snapFp;
+				},
+			},
+		);
 	};
 
-	const updateT = (key: string, patch: Partial<DraftItem>) => {
-		setTDraft((rows) => rows.map((r) => (r.key === key ? { ...r, ...patch } : r)));
-	};
-
-	const removeY = (key: string) => {
-		setYDraft((rows) => rows.filter((r) => r.key !== key));
-	};
-
-	const removeT = (key: string) => {
-		setTDraft((rows) => rows.filter((r) => r.key !== key));
-	};
-
-	const addTomorrowRow = () => {
-		setTDraft((rows) => [...rows, { key: crypto.randomUUID(), text: "", completed: false }]);
+	const flushT = () => {
+		if (saveTimerT.current) {
+			clearTimeout(saveTimerT.current);
+			saveTimerT.current = null;
+		}
+		const snapshot = tDraftRef.current;
+		const snapFp = draftFingerprintFlat(snapshot);
+		if (snapFp === lastSavedT.current) return;
+		saveTomorrowPlan.mutate(
+			{ dayTs: tomorrowTs, items: flatToPayload(snapshot) },
+			{
+				onSuccess: () => {
+					lastSavedT.current = snapFp;
+				},
+			},
+		);
 	};
 
 	const carryIncompleteForward = () => {
@@ -140,6 +189,7 @@ export function PlannerPage() {
 				key: crypto.randomUUID(),
 				text: d.text.trim(),
 				completed: false,
+				depth: 0,
 			}));
 		setTDraft((rows) => [...rows, ...appended]);
 	};
@@ -256,7 +306,9 @@ export function PlannerPage() {
 												)}
 											</Group>
 											<Text size="sm" c="dimmed">
-												Check items you completed. Anything left unchecked can roll into tomorrow.
+												Drag the grip to reorder. Drop on the middle of a row to nest, top/bottom
+												third for before/after. Tab / Shift+Tab or arrows adjust nesting. Bullets
+												save after you pause typing.
 											</Text>
 											<Divider />
 											{yDraft.length === 0 ? (
@@ -266,53 +318,49 @@ export function PlannerPage() {
 												</Text>
 											) : (
 												<Stack gap="xs">
-													{yDraft.map((row) => (
-														<Group key={row.key} gap="sm" wrap="nowrap" align="flex-start">
-															<Checkbox
-																mt={6}
-																checked={row.completed}
-																onChange={(e) =>
-																	updateY(row.key, { completed: e.currentTarget.checked })
-																}
-																disabled={!row.text.trim()}
-															/>
-															<TextInput
-																flex={1}
-																variant="unstyled"
-																placeholder="Bullet text"
-																value={row.text}
-																onChange={(e) => updateY(row.key, { text: e.currentTarget.value })}
-																styles={{
-																	input: {
-																		fontSize: "var(--mantine-font-size-md)",
-																		paddingInline: 4,
-																	},
-																}}
-															/>
-															<ActionIcon
-																variant="subtle"
-																color="gray"
-																onClick={() => removeY(row.key)}
-																aria-label="Remove bullet"
-															>
-																<Trash2 size={18} />
-															</ActionIcon>
-														</Group>
-													))}
+													<PlannerBullets
+														rows={yDraft}
+														onChange={setYDraft}
+														onBlurCommit={flushY}
+														onAdd={() =>
+															setYDraft((rows) => [
+																...rows,
+																{
+																	key: crypto.randomUUID(),
+																	text: "",
+																	completed: false,
+																	depth: 0,
+																},
+															])
+														}
+													/>
 												</Stack>
 											)}
-											<Button
-												variant="light"
-												leftSection={<Plus size={18} />}
-												onClick={() =>
-													setYDraft((rows) => [
-														...rows,
-														{ key: crypto.randomUUID(), text: "", completed: false },
-													])
-												}
-											>
-												Add bullet
-											</Button>
+											{yDraft.length === 0 ? (
+												<Button
+													variant="light"
+													leftSection={<Plus size={18} />}
+													onClick={() =>
+														setYDraft([
+															{
+																key: crypto.randomUUID(),
+																text: "",
+																completed: false,
+																depth: 0,
+															},
+														])
+													}
+												>
+													Add bullet
+												</Button>
+											) : null}
+											{saveYesterdayPlan.isError ? (
+												<Text size="sm" c="red">
+													{saveYesterdayPlan.error instanceof Error
+														? saveYesterdayPlan.error.message
+														: "Could not save yesterday"}
+												</Text>
+											) : null}
 										</Stack>
 									</Card>
 
@@ -341,81 +389,50 @@ export function PlannerPage() {
 												</Text>
 											) : (
 												<Stack gap="xs">
-													{tDraft.map((row) => (
-														<Group key={row.key} gap="sm" wrap="nowrap" align="flex-start">
-															<Checkbox
-																mt={6}
-																checked={row.completed}
-																onChange={(e) =>
-																	updateT(row.key, { completed: e.currentTarget.checked })
-																}
-																disabled={!row.text.trim()}
-															/>
-															<TextInput
-																flex={1}
-																variant="unstyled"
-																placeholder="Bullet text"
-																value={row.text}
-																onChange={(e) => updateT(row.key, { text: e.currentTarget.value })}
-																styles={{
-																	input: {
-																		fontSize: "var(--mantine-font-size-md)",
-																		paddingInline: 4,
-																	},
-																}}
-															/>
-															<ActionIcon
-																variant="subtle"
-																color="gray"
-																onClick={() => removeT(row.key)}
-																aria-label="Remove bullet"
-															>
-																<Trash2 size={18} />
-															</ActionIcon>
-														</Group>
-													))}
+													<PlannerBullets
+														rows={tDraft}
+														onChange={setTDraft}
+														onBlurCommit={flushT}
+														onAdd={() =>
+															setTDraft((rows) => [
+																...rows,
+																{
+																	key: crypto.randomUUID(),
+																	text: "",
+																	completed: false,
+																	depth: 0,
+																},
+															])
+														}
+													/>
 												</Stack>
 											)}
-											<Button
-												variant="light"
-												leftSection={<Plus size={18} />}
-												onClick={addTomorrowRow}
-											>
-												Add bullet
-											</Button>
-										</Stack>
-									</Card>
-
-									<Card withBorder radius="lg" padding="lg" bg="var(--mantine-color-body)">
-										<Group justify="space-between" align="center">
-											<div>
-												<Text fw={600}>Save changes</Text>
-												<Text size="sm" c="dimmed">
-													Writes both yesterday and tomorrow plans.
+											{tDraft.length === 0 ? (
+												<Button
+													variant="light"
+													leftSection={<Plus size={18} />}
+													onClick={() =>
+														setTDraft([
+															{
+																key: crypto.randomUUID(),
+																text: "",
+																completed: false,
+																depth: 0,
+															},
+														])
+													}
+												>
+													Add bullet
+												</Button>
+											) : null}
+											{saveTomorrowPlan.isError ? (
+												<Text size="sm" c="red">
+													{saveTomorrowPlan.error instanceof Error
+														? saveTomorrowPlan.error.message
+														: "Could not save tomorrow"}
 												</Text>
-											</div>
-											<Button
-												size="md"
-												loading={saveEveningReview.isPending}
-												onClick={() =>
-													saveEveningReview.mutate({
-														yesterdayTs,
-														tomorrowTs,
-														yesterdayItems: toPayload(yDraft),
-														tomorrowItems: toPayload(tDraft),
-													})
-												}
-											>
-												Save day
-											</Button>
-										</Group>
-										{saveEveningReview.isError ? (
-											<Text mt="sm" size="sm" c="red">
-												{saveEveningReview.error instanceof Error
-													? saveEveningReview.error.message
-													: "Save failed"}
-											</Text>
-										) : null}
+											) : null}
+										</Stack>
 									</Card>
 								</>
 							)}

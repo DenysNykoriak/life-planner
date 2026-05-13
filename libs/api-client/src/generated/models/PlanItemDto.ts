@@ -43,6 +43,12 @@ export interface PlanItemDto {
      * @memberof PlanItemDto
      */
     sortOrder: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PlanItemDto
+     */
+    parentId: string | null;
 }
 
 /**
@@ -53,6 +59,7 @@ export function instanceOfPlanItemDto(value: object): value is PlanItemDto {
     if (!('text' in value) || value['text'] === undefined) return false;
     if (!('completed' in value) || value['completed'] === undefined) return false;
     if (!('sortOrder' in value) || value['sortOrder'] === undefined) return false;
+    if (!('parentId' in value)) return false;
     return true;
 }
 
@@ -70,6 +77,7 @@ export function PlanItemDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'text': json['text'],
         'completed': json['completed'],
         'sortOrder': json['sortOrder'],
+        'parentId': json['parentId'],
     };
 }
 
@@ -88,6 +96,7 @@ export function PlanItemDtoToJSONTyped(value?: PlanItemDto | null, ignoreDiscrim
         'text': value['text'],
         'completed': value['completed'],
         'sortOrder': value['sortOrder'],
+        'parentId': value['parentId'],
     };
 }
 
