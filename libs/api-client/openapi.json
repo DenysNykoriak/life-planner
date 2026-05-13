@@ -97,12 +97,10 @@
 			},
 			"PlanItemInputDto": {
 				"type": "object",
-				"required": ["text", "completed", "sortOrder"],
+				"required": ["text", "completed"],
 				"properties": {
-					"id": { "type": "string", "nullable": true },
 					"text": { "type": "string" },
 					"completed": { "type": "boolean" },
-					"sortOrder": { "type": "integer" },
 					"depth": { "type": "integer", "minimum": 0 }
 				}
 			},

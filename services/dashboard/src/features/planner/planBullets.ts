@@ -152,10 +152,9 @@ export function removeSubtreeKey(flat: FlatBullet[], key: string): FlatBullet[] 
 export function flatToPayload(flat: FlatBullet[]): PlanItemWrite[] {
 	const trimmed = flat.map((r) => ({ ...r, text: r.text.trim() })).filter((r) => r.text.length > 0);
 	const clamped = clampFlatDepths(trimmed);
-	return clamped.map((row, idx) => ({
+	return clamped.map((row) => ({
 		text: row.text,
 		completed: row.completed,
-		sortOrder: idx,
 		depth: row.depth,
 	}));
 }

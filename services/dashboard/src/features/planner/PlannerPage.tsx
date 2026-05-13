@@ -17,18 +17,12 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { CalendarDays, LogOut, Plus } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useAuth } from "@/features/auth/AuthContext";
+import { usePlanDraft } from "@/features/planner/hooks/usePlanDraft";
 import { usePlansActions } from "@/features/planner/hooks/usePlansActions";
 import { usePlansFetch } from "@/features/planner/hooks/usePlansFetch";
 import { PlannerBullets } from "@/features/planner/PlannerBullets";
-import {
-	draftFingerprintFlat,
-	type FlatBullet,
-	flatToPayload,
-	itemsToFlat,
-	planFingerprint,
-} from "@/features/planner/planBullets";
 
 export function PlannerPage() {
 	const navigate = useNavigate();
@@ -62,123 +56,19 @@ export function PlannerPage() {
 		}
 	}, [ready, user, navigate]);
 
-	const [yDraft, setYDraft] = useState<FlatBullet[]>([]);
-	const [tDraft, setTDraft] = useState<FlatBullet[]>([]);
-	const [ySeed, setYSeed] = useState("");
-	const [tSeed, setTSeed] = useState("");
+	const planEnabled = Boolean(user) && !loadingPlans;
 
-	const lastSavedY = useRef<string | null>(null);
-	const lastSavedT = useRef<string | null>(null);
-	const yDraftRef = useRef(yDraft);
-	const tDraftRef = useRef(tDraft);
-	yDraftRef.current = yDraft;
-	tDraftRef.current = tDraft;
-	const saveTimerY = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const saveTimerT = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const {
+		draft: yDraft,
+		setDraft: setYDraft,
+		flush: flushY,
+	} = usePlanDraft(yesterdayPlan?.items, saveYesterdayPlan.mutate, yesterdayTs, planEnabled);
 
-	useEffect(() => {
-		if (!yesterdayPlan) return;
-		const fp = planFingerprint(yesterdayPlan.items);
-		if (fp !== ySeed) {
-			setYDraft(itemsToFlat(yesterdayPlan.items));
-			setYSeed(fp);
-			lastSavedY.current = fp;
-		}
-	}, [yesterdayPlan, ySeed]);
-
-	useEffect(() => {
-		if (!tomorrowPlan) return;
-		const fp = planFingerprint(tomorrowPlan.items);
-		if (fp !== tSeed) {
-			setTDraft(itemsToFlat(tomorrowPlan.items));
-			setTSeed(fp);
-			lastSavedT.current = fp;
-		}
-	}, [tomorrowPlan, tSeed]);
-
-	useEffect(() => {
-		if (!user || loadingPlans) return;
-		const fp = draftFingerprintFlat(yDraft);
-		if (fp === lastSavedY.current) return;
-		if (saveTimerY.current) clearTimeout(saveTimerY.current);
-		saveTimerY.current = setTimeout(() => {
-			saveTimerY.current = null;
-			const snapshot = yDraftRef.current;
-			const snapFp = draftFingerprintFlat(snapshot);
-			if (snapFp === lastSavedY.current) return;
-			saveYesterdayPlan.mutate(
-				{ dayTs: yesterdayTs, items: flatToPayload(snapshot) },
-				{
-					onSuccess: () => {
-						lastSavedY.current = snapFp;
-					},
-				},
-			);
-		}, 450);
-		return () => {
-			if (saveTimerY.current) clearTimeout(saveTimerY.current);
-		};
-	}, [yDraft, user, loadingPlans, yesterdayTs, saveYesterdayPlan]);
-
-	useEffect(() => {
-		if (!user || loadingPlans) return;
-		const fp = draftFingerprintFlat(tDraft);
-		if (fp === lastSavedT.current) return;
-		if (saveTimerT.current) clearTimeout(saveTimerT.current);
-		saveTimerT.current = setTimeout(() => {
-			saveTimerT.current = null;
-			const snapshot = tDraftRef.current;
-			const snapFp = draftFingerprintFlat(snapshot);
-			if (snapFp === lastSavedT.current) return;
-			saveTomorrowPlan.mutate(
-				{ dayTs: tomorrowTs, items: flatToPayload(snapshot) },
-				{
-					onSuccess: () => {
-						lastSavedT.current = snapFp;
-					},
-				},
-			);
-		}, 450);
-		return () => {
-			if (saveTimerT.current) clearTimeout(saveTimerT.current);
-		};
-	}, [tDraft, user, loadingPlans, tomorrowTs, saveTomorrowPlan]);
-
-	const flushY = () => {
-		if (saveTimerY.current) {
-			clearTimeout(saveTimerY.current);
-			saveTimerY.current = null;
-		}
-		const snapshot = yDraftRef.current;
-		const snapFp = draftFingerprintFlat(snapshot);
-		if (snapFp === lastSavedY.current) return;
-		saveYesterdayPlan.mutate(
-			{ dayTs: yesterdayTs, items: flatToPayload(snapshot) },
-			{
-				onSuccess: () => {
-					lastSavedY.current = snapFp;
-				},
-			},
-		);
-	};
-
-	const flushT = () => {
-		if (saveTimerT.current) {
-			clearTimeout(saveTimerT.current);
-			saveTimerT.current = null;
-		}
-		const snapshot = tDraftRef.current;
-		const snapFp = draftFingerprintFlat(snapshot);
-		if (snapFp === lastSavedT.current) return;
-		saveTomorrowPlan.mutate(
-			{ dayTs: tomorrowTs, items: flatToPayload(snapshot) },
-			{
-				onSuccess: () => {
-					lastSavedT.current = snapFp;
-				},
-			},
-		);
-	};
+	const {
+		draft: tDraft,
+		setDraft: setTDraft,
+		flush: flushT,
+	} = usePlanDraft(tomorrowPlan?.items, saveTomorrowPlan.mutate, tomorrowTs, planEnabled);
 
 	const carryIncompleteForward = () => {
 		const incomplete = yDraft.filter((d) => !d.completed && d.text.trim().length > 0);

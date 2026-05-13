@@ -20,31 +20,19 @@ import { mapValues } from '../runtime';
  */
 export interface PlanItemInputDto {
     /**
-     * 
-     * @type {string}
-     * @memberof PlanItemInputDto
-     */
-    id?: string | null;
-    /**
-     * 
+     *
      * @type {string}
      * @memberof PlanItemInputDto
      */
     text: string;
     /**
-     * 
+     *
      * @type {boolean}
      * @memberof PlanItemInputDto
      */
     completed: boolean;
     /**
-     * 
-     * @type {number}
-     * @memberof PlanItemInputDto
-     */
-    sortOrder: number;
-    /**
-     * 
+     *
      * @type {number}
      * @memberof PlanItemInputDto
      */
@@ -57,7 +45,6 @@ export interface PlanItemInputDto {
 export function instanceOfPlanItemInputDto(value: object): value is PlanItemInputDto {
     if (!('text' in value) || value['text'] === undefined) return false;
     if (!('completed' in value) || value['completed'] === undefined) return false;
-    if (!('sortOrder' in value) || value['sortOrder'] === undefined) return false;
     return true;
 }
 
@@ -70,11 +57,9 @@ export function PlanItemInputDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         return json;
     }
     return {
-        
-        'id': json['id'] == null ? undefined : json['id'],
+
         'text': json['text'],
         'completed': json['completed'],
-        'sortOrder': json['sortOrder'],
         'depth': json['depth'] == null ? undefined : json['depth'],
     };
 }
@@ -89,11 +74,9 @@ export function PlanItemInputDtoToJSONTyped(value?: PlanItemInputDto | null, ign
     }
 
     return {
-        
-        'id': value['id'],
+
         'text': value['text'],
         'completed': value['completed'],
-        'sortOrder': value['sortOrder'],
         'depth': value['depth'],
     };
 }

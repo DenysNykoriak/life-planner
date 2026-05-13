@@ -38,7 +38,6 @@ async function mapApiError(error: unknown): Promise<never> {
 export type PlanItemWrite = {
 	text: string;
 	completed: boolean;
-	sortOrder: number;
 	depth: number;
 };
 
@@ -52,10 +51,9 @@ export async function getDayPlan(dayTimestampMs: number): Promise<DayPlan> {
 
 export async function putDayPlan(dayTimestampMs: number, items: PlanItemWrite[]): Promise<DayPlan> {
 	const body: UpdatePlanDto = {
-		items: items.map((i, idx) => ({
+		items: items.map((i) => ({
 			text: i.text,
 			completed: i.completed,
-			sortOrder: i.sortOrder ?? idx,
 			depth: i.depth ?? 0,
 		})),
 	};

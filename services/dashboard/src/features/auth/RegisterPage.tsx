@@ -11,23 +11,17 @@ import {
 } from "@mantine/core";
 import { useNavigate } from "@tanstack/react-router";
 import type { FormEvent } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "@/features/auth/AuthContext";
 
 export function RegisterPage() {
 	const navigate = useNavigate();
-	const { register, user, ready } = useAuth();
+	const { register } = useAuth();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-
-	useEffect(() => {
-		if (ready && user) {
-			void navigate({ to: "/" });
-		}
-	}, [ready, user, navigate]);
 
 	const onSubmit = async (e: FormEvent) => {
 		e.preventDefault();

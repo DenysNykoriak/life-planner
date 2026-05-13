@@ -10,19 +10,11 @@ import {
 } from "class-validator";
 
 export class PlanItemInputDto {
-	@IsOptional()
-	@IsString()
-	id?: string;
-
 	@IsString()
 	text!: string;
 
 	@IsBoolean()
 	completed!: boolean;
-
-	@IsInt()
-	@Min(0)
-	sortOrder!: number;
 
 	@IsOptional()
 	@IsInt()
