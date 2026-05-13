@@ -6,10 +6,9 @@
 
 Name | Type
 ------------ | -------------
-`id` | string
 `text` | string
 `completed` | boolean
-`sortOrder` | number
+`depth` | number
 
 ## Example
 
@@ -18,10 +17,9 @@ import type { PlanItemInputDto } from ''
 
 // TODO: Update the object below with actual values
 const example = {
-  "id": null,
   "text": null,
   "completed": null,
-  "sortOrder": null,
+  "depth": null,
 } satisfies PlanItemInputDto
 
 console.log(example)

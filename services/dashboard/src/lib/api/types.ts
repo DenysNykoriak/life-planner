@@ -5,4 +5,9 @@ export type UserMe = {
 	image?: string | null;
 };
 
-export type { DayPlanDto as DayPlan, PlanItemDto as PlanItem } from "@life-planner/api-client";
+export type {
+	DayPlanDto as DayPlan,
+	KnowledgeEntryDto as KnowledgeEntry,
+	PlanItemDto as PlanItem,
+	ProjectDto as Project,
+} from "@life-planner/api-client";

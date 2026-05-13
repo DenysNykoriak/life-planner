@@ -10,6 +10,7 @@ Name | Type
 `text` | string
 `completed` | boolean
 `sortOrder` | number
+`parentId` | string
 
 ## Example
 
@@ -22,6 +23,7 @@ const example = {
   "text": null,
   "completed": null,
   "sortOrder": null,
+  "parentId": null,
 } satisfies PlanItemDto
 
 console.log(example)

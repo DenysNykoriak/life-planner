@@ -59,7 +59,7 @@ export function instanceOfPlanItemDto(value: object): value is PlanItemDto {
     if (!('text' in value) || value['text'] === undefined) return false;
     if (!('completed' in value) || value['completed'] === undefined) return false;
     if (!('sortOrder' in value) || value['sortOrder'] === undefined) return false;
-    if (!('parentId' in value)) return false;
+    if (!('parentId' in value) || value['parentId'] === undefined) return false;
     return true;
 }
 

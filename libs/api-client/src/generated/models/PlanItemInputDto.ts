@@ -20,23 +20,23 @@ import { mapValues } from '../runtime';
  */
 export interface PlanItemInputDto {
     /**
-     *
+     * 
      * @type {string}
      * @memberof PlanItemInputDto
      */
     text: string;
     /**
-     *
+     * 
      * @type {boolean}
      * @memberof PlanItemInputDto
      */
     completed: boolean;
     /**
-     *
+     * 
      * @type {number}
      * @memberof PlanItemInputDto
      */
-    depth?: number | null;
+    depth?: number;
 }
 
 /**
@@ -57,7 +57,7 @@ export function PlanItemInputDtoFromJSONTyped(json: any, ignoreDiscriminator: bo
         return json;
     }
     return {
-
+        
         'text': json['text'],
         'completed': json['completed'],
         'depth': json['depth'] == null ? undefined : json['depth'],
@@ -74,7 +74,7 @@ export function PlanItemInputDtoToJSONTyped(value?: PlanItemInputDto | null, ign
     }
 
     return {
-
+        
         'text': value['text'],
         'completed': value['completed'],
         'depth': value['depth'],

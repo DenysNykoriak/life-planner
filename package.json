@@ -17,5 +17,8 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.4"
+	},
+	"dependencies": {
+		"@ai-sdk/openai-compatible": "^2.0.47"
 	}
 }

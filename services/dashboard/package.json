@@ -14,6 +14,7 @@
 		"@life-planner/api-client": "*",
 		"@mantine/core": "^7.17.4",
 		"@mantine/hooks": "^7.17.4",
+		"@mantine/modals": "^9.2.0",
 		"@tanstack/react-query": "^5.76.1",
 		"@tanstack/react-router": "^1.120.12",
 		"@tanstack/router-plugin": "^1.167.35",

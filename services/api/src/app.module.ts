@@ -3,7 +3,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { AuthModule } from "@thallesp/nestjs-better-auth";
 import { createBetterAuth } from "./auth";
 import { validateEnv } from "./config/env.validation";
+import { KnowledgeModule } from "./knowledge/knowledge.module";
 import { PlansModule } from "./plans/plans.module";
+import { ProjectsModule } from "./projects/projects.module";
 import { PrismaModule } from "./prisma/prisma.module";
 import { PrismaService } from "./prisma/prisma.service";
 
@@ -32,6 +34,8 @@ import { PrismaService } from "./prisma/prisma.service";
 			}),
 		}),
 		PlansModule,
+		KnowledgeModule,
+		ProjectsModule,
 	],
 })
 export class AppModule {}

@@ -29,6 +29,10 @@ class Env {
 	@IsOptional()
 	@IsString()
 	FRONTEND_URL?: string;
+
+	@IsOptional()
+	@IsString()
+	MODEL_RUNNER_URL?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

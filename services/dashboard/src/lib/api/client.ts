@@ -4,7 +4,7 @@ import {
 	ResponseError,
 	type UpdatePlanDto,
 } from "@life-planner/api-client";
-import type { DayPlan } from "./types";
+import type { DayPlan, KnowledgeEntry, Project } from "./types";
 
 const origin = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
@@ -44,6 +44,76 @@ export type PlanItemWrite = {
 export async function getDayPlan(dayTimestampMs: number): Promise<DayPlan> {
 	try {
 		return await api.plans.getPlansDay(dayTimestampMs);
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function getKnowledgeQueue(): Promise<{ id: string; position: number }[]> {
+	try {
+		return await api.knowledge.getKnowledgeQueue();
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function getKnowledgeEntries(): Promise<KnowledgeEntry[]> {
+	try {
+		return await api.knowledge.getKnowledge();
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function createKnowledgeEntry(
+	text: string,
+	projectId?: string,
+): Promise<KnowledgeEntry> {
+	try {
+		return await api.knowledge.postKnowledge({ text, projectId });
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function updateKnowledgeEntry(
+	id: string,
+	dto: { text?: string; projectId?: string | null },
+): Promise<KnowledgeEntry> {
+	try {
+		return await api.knowledge.patchKnowledge(id, dto);
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function deleteKnowledgeEntry(id: string): Promise<void> {
+	try {
+		return await api.knowledge.deleteKnowledge(id);
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function getProjects(): Promise<Project[]> {
+	try {
+		return await api.projects.getProjects();
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function createProject(name: string): Promise<Project> {
+	try {
+		return await api.projects.postProject({ name });
+	} catch (e) {
+		return mapApiError(e);
+	}
+}
+
+export async function deleteProject(id: string): Promise<void> {
+	try {
+		return await api.projects.deleteProject(id);
 	} catch (e) {
 		return mapApiError(e);
 	}

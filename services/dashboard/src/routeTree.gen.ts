@@ -11,7 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppPlannerRouteImport } from './routes/_app.planner'
+import { Route as AppKnowledgeIndexRouteImport } from './routes/_app.knowledge.index'
+import { Route as AppKnowledgeBrowseRouteImport } from './routes/_app.knowledge.browse'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -23,38 +27,88 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppPlannerRoute = AppPlannerRouteImport.update({
+  id: '/planner',
+  path: '/planner',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppKnowledgeIndexRoute = AppKnowledgeIndexRouteImport.update({
+  id: '/knowledge/',
+  path: '/knowledge/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppKnowledgeBrowseRoute = AppKnowledgeBrowseRouteImport.update({
+  id: '/knowledge/browse',
+  path: '/knowledge/browse',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/planner': typeof AppPlannerRoute
+  '/knowledge/browse': typeof AppKnowledgeBrowseRoute
+  '/knowledge/': typeof AppKnowledgeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/planner': typeof AppPlannerRoute
+  '/knowledge/browse': typeof AppKnowledgeBrowseRoute
+  '/knowledge': typeof AppKnowledgeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/_app/planner': typeof AppPlannerRoute
+  '/_app/knowledge/browse': typeof AppKnowledgeBrowseRoute
+  '/_app/knowledge/': typeof AppKnowledgeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/planner'
+    | '/knowledge/browse'
+    | '/knowledge/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register'
-  id: '__root__' | '/' | '/login' | '/register'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/planner'
+    | '/knowledge/browse'
+    | '/knowledge'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/register'
+    | '/_app/planner'
+    | '/_app/knowledge/browse'
+    | '/_app/knowledge/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
 }
@@ -75,6 +129,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,11 +143,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/planner': {
+      id: '/_app/planner'
+      path: '/planner'
+      fullPath: '/planner'
+      preLoaderRoute: typeof AppPlannerRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/knowledge/': {
+      id: '/_app/knowledge/'
+      path: '/knowledge'
+      fullPath: '/knowledge/'
+      preLoaderRoute: typeof AppKnowledgeIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/knowledge/browse': {
+      id: '/_app/knowledge/browse'
+      path: '/knowledge/browse'
+      fullPath: '/knowledge/browse'
+      preLoaderRoute: typeof AppKnowledgeBrowseRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppPlannerRoute: typeof AppPlannerRoute
+  AppKnowledgeBrowseRoute: typeof AppKnowledgeBrowseRoute
+  AppKnowledgeIndexRoute: typeof AppKnowledgeIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppPlannerRoute: AppPlannerRoute,
+  AppKnowledgeBrowseRoute: AppKnowledgeBrowseRoute,
+  AppKnowledgeIndexRoute: AppKnowledgeIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
 }

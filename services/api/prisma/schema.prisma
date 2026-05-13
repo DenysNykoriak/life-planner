@@ -8,16 +8,18 @@ datasource db {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  dailyPlans    DailyPlan[]
+  id               String           @id
+  name             String
+  email            String
+  emailVerified    Boolean          @default(false)
+  image            String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  dailyPlans       DailyPlan[]
+  knowledgeEntries KnowledgeEntry[]
+  projects         Project[]
 
   @@unique([email])
   @@map("user")
@@ -93,6 +95,32 @@ model PlanItem {
   completed   Boolean   @default(false)
 
   @@index([parentId])
+}
+
+model Project {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime         @default(now())
+  entries   KnowledgeEntry[]
+
+  @@index([userId])
+  @@map("project")
+}
+
+model KnowledgeEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rawText   String
+  tags      String[]
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("knowledge_entry")
 }
 
 

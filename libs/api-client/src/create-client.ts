@@ -1,8 +1,10 @@
 import { BETTER_AUTH_BEARER_STORAGE_KEY } from "./constants";
-import { Configuration, PlansApi } from "./generated/index";
+import { Configuration, KnowledgeApi, PlansApi, ProjectsApi } from "./generated/index";
 
 export type LifePlannerApiClient = {
 	plans: PlansApi;
+	knowledge: KnowledgeApi;
+	projects: ProjectsApi;
 };
 
 export function createLifePlannerApiClient(apiOrigin: string): LifePlannerApiClient {
@@ -30,5 +32,7 @@ export function createLifePlannerApiClient(apiOrigin: string): LifePlannerApiCli
 	});
 	return {
 		plans: new PlansApi(configuration),
+		knowledge: new KnowledgeApi(configuration),
+		projects: new ProjectsApi(configuration),
 	};
 }

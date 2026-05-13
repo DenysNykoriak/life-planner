@@ -42,4 +42,6 @@ Workspaces: `package.json` root links all three. Run `npm install` at root.
 4. Update `libs/api-client/openapi.json` → `cd libs/api-client && npm run build`
 5. Add `services/dashboard/src/lib/queryKeys.ts` entry
 6. Add `services/dashboard/src/features/<domain>/hooks/use<Domain>Fetch.ts` + `use<Domain>Actions.ts`
-7. Add page component + route file under `services/dashboard/src/routes/`
+7. Add page components under `services/dashboard/src/features/<domain>/`
+8. Add route files `_app.<domain>.tsx` (or `_app.<domain>.index.tsx` + `_app.<domain>.browse.tsx`) under `services/dashboard/src/routes/`
+9. Add feature tab + optional sub-nav links to `routes/_app.tsx` header if this is a top-level nav feature

@@ -5,8 +5,112 @@
 		"version": "1.0.0"
 	},
 	"servers": [{ "url": "http://localhost:3000/api", "description": "API (set base via client)" }],
-	"tags": [{ "name": "plans", "description": "Daily plans" }],
+	"tags": [
+		{ "name": "plans", "description": "Daily plans" },
+		{ "name": "knowledge", "description": "Knowledge base entries" },
+		{ "name": "projects", "description": "Projects" }
+	],
 	"paths": {
+		"/knowledge": {
+			"get": {
+				"tags": ["knowledge"],
+				"operationId": "getKnowledge",
+				"responses": {
+					"200": {
+						"description": "All knowledge entries for the user",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": { "$ref": "#/components/schemas/KnowledgeEntryDto" }
+								}
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			},
+			"post": {
+				"tags": ["knowledge"],
+				"operationId": "postKnowledge",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": { "$ref": "#/components/schemas/CreateKnowledgeDto" }
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Created knowledge entry",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/KnowledgeEntryDto" }
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			}
+		},
+		"/knowledge/queue": {
+			"get": {
+				"tags": ["knowledge"],
+				"operationId": "getKnowledgeQueue",
+				"responses": {
+					"200": {
+						"description": "Current categorization queue",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": { "$ref": "#/components/schemas/KnowledgeQueueItemDto" }
+								}
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			}
+		},
+		"/knowledge/{id}": {
+			"patch": {
+				"tags": ["knowledge"],
+				"operationId": "patchKnowledge",
+				"parameters": [
+					{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": { "$ref": "#/components/schemas/UpdateKnowledgeDto" }
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Updated knowledge entry",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/KnowledgeEntryDto" }
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			},
+			"delete": {
+				"tags": ["knowledge"],
+				"operationId": "deleteKnowledge",
+				"parameters": [
+					{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+				],
+				"responses": { "204": { "description": "Deleted" } },
+				"security": [{ "cookieAuth": [] }]
+			}
+		},
 		"/plans/day/{dayTimestamp}": {
 			"get": {
 				"tags": ["plans"],
@@ -62,6 +166,60 @@
 				},
 				"security": [{ "cookieAuth": [] }]
 			}
+		},
+		"/projects": {
+			"get": {
+				"tags": ["projects"],
+				"operationId": "getProjects",
+				"responses": {
+					"200": {
+						"description": "All projects for the user",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": { "$ref": "#/components/schemas/ProjectDto" }
+								}
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			},
+			"post": {
+				"tags": ["projects"],
+				"operationId": "postProject",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": { "$ref": "#/components/schemas/CreateProjectDto" }
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Created project",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/ProjectDto" }
+							}
+						}
+					}
+				},
+				"security": [{ "cookieAuth": [] }]
+			}
+		},
+		"/projects/{id}": {
+			"delete": {
+				"tags": ["projects"],
+				"operationId": "deleteProject",
+				"parameters": [
+					{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+				],
+				"responses": { "204": { "description": "Deleted" } },
+				"security": [{ "cookieAuth": [] }]
+			}
 		}
 	},
 	"components": {
@@ -73,6 +231,40 @@
 			}
 		},
 		"schemas": {
+			"KnowledgeQueueItemDto": {
+				"type": "object",
+				"required": ["id", "position"],
+				"properties": {
+					"id": { "type": "string" },
+					"position": { "type": "integer" }
+				}
+			},
+			"KnowledgeEntryDto": {
+				"type": "object",
+				"required": ["id", "rawText", "tags", "createdAt"],
+				"properties": {
+					"id": { "type": "string" },
+					"rawText": { "type": "string" },
+					"tags": { "type": "array", "items": { "type": "string" } },
+					"projectId": { "type": "string", "nullable": true },
+					"createdAt": { "type": "integer", "format": "int64" }
+				}
+			},
+			"CreateKnowledgeDto": {
+				"type": "object",
+				"required": ["text"],
+				"properties": {
+					"text": { "type": "string" },
+					"projectId": { "type": "string" }
+				}
+			},
+			"UpdateKnowledgeDto": {
+				"type": "object",
+				"properties": {
+					"text": { "type": "string" },
+					"projectId": { "type": "string", "nullable": true }
+				}
+			},
 			"PlanItemDto": {
 				"type": "object",
 				"required": ["id", "text", "completed", "sortOrder", "parentId"],
@@ -112,6 +304,22 @@
 						"type": "array",
 						"items": { "$ref": "#/components/schemas/PlanItemInputDto" }
 					}
+				}
+			},
+			"ProjectDto": {
+				"type": "object",
+				"required": ["id", "name", "createdAt"],
+				"properties": {
+					"id": { "type": "string" },
+					"name": { "type": "string" },
+					"createdAt": { "type": "integer", "format": "int64" }
+				}
+			},
+			"CreateProjectDto": {
+				"type": "object",
+				"required": ["name"],
+				"properties": {
+					"name": { "type": "string" }
 				}
 			}
 		}
